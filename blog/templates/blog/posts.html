@@ -3,7 +3,7 @@
 {% block content %}
 <h2>Список постов</h2>
 {% for post in posts %}
-    <p>{{post.author}}: {{post.title}}</p>
+    <p>{{post.author}}: <a href="{% url 'blog:post_detail' pk=post.id%}">{{post.title}}</a></p>
     <p>{{post.text}}</p>
     <p>{{post.created_at}}</p>
     <br>

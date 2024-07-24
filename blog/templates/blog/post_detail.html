@@ -1,0 +1,21 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+<h2>Информация о посте № {{post.id}} </h2>
+<hr>
+<p>Автор - {{post.author}}</p>
+<p>Название - {{post.title}}</p>
+<p>Текст поста:</p>
+<p>{{post.text}}</p>
+<br>
+<p>Создан: {{post.created_at}}</p>
+
+<div>
+    <a href="{% url 'blog:post_edit' pk=post.id %}" class="btn btn-primary">Редактировать</a>
+    <form action="{% url 'blog:post_delete' pk=post.id %}" method="post" style="display:inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Удалить</button>
+    </form>
+</div>
+
+{% endblock content %}

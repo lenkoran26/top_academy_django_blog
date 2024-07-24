@@ -1,9 +1,14 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 
 from .forms import PostForm
 from .models import Post
 
+
+"""
+FBV - Function based views
+CBV - Class based views
+"""
 
 def root(request):
     return render(request, template_name='blog/index.html')
@@ -52,3 +57,34 @@ def post_list(request):
         'posts': posts
     }
     return render(request, template_name='blog/posts.html', context=context)
+
+
+def post_detail(request, pk):
+    # получаем объект с заданным PK
+    post = get_object_or_404(Post, pk=pk)
+    context = {
+        'title': 'Информация о посте',
+        'post': post
+    }
+    return render(request, template_name='blog/post_detail.html', context=context)
+
+
+def post_edit(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    if request.method == "POST":
+        form = PostForm(data=request.POST, instance=post)
+        if form.is_valid():
+            form.save()
+            return post_list(request)
+    else:
+        form = PostForm(instance=post)
+
+    context = {
+        'form': form,
+        'title': "Редактировать пост"
+    }
+    return render(request, template_name="blog/post_edit.html", context=context)
+
+
+def post_delete(request, pk):
+    post = get_object_or_404(Post, pk=pk)
