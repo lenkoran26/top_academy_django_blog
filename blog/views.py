@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
 
 from .forms import PostForm
@@ -38,15 +38,11 @@ def add_post(request):
         return render(request, template_name='blog/add_post.html', context=context)
 
     if request.method == "POST":
-        form = PostForm(data=request.POST)
+        form = PostForm(request.POST, request.FILES)
         if form.is_valid():
-            post = Post()
-            post.author = form.cleaned_data['author']
-            post.title = form.cleaned_data['title']
-            post.text = form.cleaned_data['text']
-            post.save()
+            form.save()
 
-            return index(request)
+        return index(request)
 
 
 def post_list(request):
@@ -88,3 +84,15 @@ def post_edit(request, pk):
 
 def post_delete(request, pk):
     post = get_object_or_404(Post, pk=pk)
+    if request.method == "POST":
+        post.delete()
+        return redirect("blog:post_list")
+    return render(request, template_name="blog/post_delete.html", context={'post': post})
+
+
+def page_not_found(request, exception):
+    return render(request, 'blog/404.html', status=404)
+
+
+def server_error(request):
+    return render(request, 'blog/500.html', status=500)

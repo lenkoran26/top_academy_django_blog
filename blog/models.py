@@ -8,6 +8,7 @@ class Post(models.Model):
     title = models.CharField(max_length=200, verbose_name="Заголовок")
     text = models.TextField(verbose_name="Текст поста")
     created_at = models.DateTimeField(default=timezone.now, verbose_name='Опубликовано', editable=False)
+    image = models.ImageField(upload_to='posts/', null=True, verbose_name='Изображение')
 
     class Meta:
         # имя таблицы в единств. числе
