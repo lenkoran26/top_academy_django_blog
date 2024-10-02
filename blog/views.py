@@ -1,5 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 
 from .forms import PostForm
 from .models import Post
@@ -28,9 +30,10 @@ def about(request):
     return render(request, template_name='blog/about.html', context=context)
 
 
+@login_required
 def add_post(request):
     if request.method == "GET":
-        form = PostForm()
+        form = PostForm(author=request.user)
         context = {
             'form': form,
             'title': 'Добавление поста'
@@ -38,7 +41,7 @@ def add_post(request):
         return render(request, template_name='blog/add_post.html', context=context)
 
     if request.method == "POST":
-        form = PostForm(request.POST, request.FILES)
+        form = PostForm(request.POST, request.FILES, author=request.user)
         if form.is_valid():
             form.save()
 
@@ -47,24 +50,31 @@ def add_post(request):
 
 def post_list(request):
     # получаем все объекты модели Post
-    posts = Post.objects.all()
+    # сортируем по убыванию
+    posts = Post.objects.all().order_by('-created_at')
+    # показываем по 3 поста на странице
+    paginator = Paginator(posts, 3)
+    # получаем номер страницы из url
+    page_number = request.GET.get('page')
+    # получаем объекты для текущей страницы
+    page_obj = paginator.get_page(page_number)
     context = {
         'title': 'Посты',
-        'posts': posts
+        'page_obj': page_obj
     }
     return render(request, template_name='blog/posts.html', context=context)
 
 
-def post_detail(request, pk):
+def post_detail(request, slug):
     # получаем объект с заданным PK
-    post = get_object_or_404(Post, pk=pk)
+    post = get_object_or_404(Post, slug=slug)
     context = {
         'title': 'Информация о посте',
         'post': post
     }
     return render(request, template_name='blog/post_detail.html', context=context)
 
-
+@login_required
 def post_edit(request, pk):
     post = get_object_or_404(Post, pk=pk)
     if request.method == "POST":
@@ -81,7 +91,7 @@ def post_edit(request, pk):
     }
     return render(request, template_name="blog/post_edit.html", context=context)
 
-
+@login_required
 def post_delete(request, pk):
     post = get_object_or_404(Post, pk=pk)
     if request.method == "POST":
@@ -92,6 +102,10 @@ def post_delete(request, pk):
 
 def page_not_found(request, exception):
     return render(request, 'blog/404.html', status=404)
+
+
+def forbidden(request, exception):
+    return render(request, 'blog/403.html', status=403)
 
 
 def server_error(request):

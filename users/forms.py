@@ -22,3 +22,23 @@ class UserRegistrationForm(forms.ModelForm):
         fields = ('username', 'password',
                   'first_name', 'last_name', 'email',
                   'phone', 'city')
+
+
+class CustomPasswordChangeForm(forms.Form):
+    old_password = forms.CharField(label="Старый пароль", widget=forms.PasswordInput)
+    new_password_1 = forms.CharField(label="Новый пароль", widget=forms.PasswordInput)
+    new_password_2 = forms.CharField(label="Повторите новый пароль", widget=forms.PasswordInput)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password_1 = cleaned_data['new_password_1']
+        new_password_2 = cleaned_data['new_password_2']
+        old_password = cleaned_data['old_password']
+
+        if new_password_1 and new_password_2 and new_password_1 != new_password_2:
+            raise forms.ValidationError("Пароли не совпадают!")
+
+        if new_password_1 and new_password_2 and new_password_1 == new_password_2 and new_password_1 == old_password:
+            raise forms.ValidationError("Пароль совпадает с текущийм")
+
+        return cleaned_data

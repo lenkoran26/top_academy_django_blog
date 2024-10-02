@@ -8,6 +8,14 @@ from .models import Post
 
 
 class PostForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        author = kwargs.pop('author', None)
+        super(PostForm, self).__init__(*args, **kwargs)
+        if author:
+            self.fields['author'].initial = author
+            self.fields['author'].disabled = True
+
     class Meta:
         model = Post
         fields = ['author', 'title', 'text', 'image']

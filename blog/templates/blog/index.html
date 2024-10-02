@@ -1,6 +1,8 @@
 {% extends 'blog/base.html' %}
 
 {% block content %}
-<a href="{% url 'blog:post_list'%}">Посты</a>
+<h2>
+    <a href="{% url 'blog:add_post' %}">Добавить новый пост</a>
+</h2>
 
 {% endblock content %}
